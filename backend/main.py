@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import cv, offres
+from routers import cv, offres, stats
+
 
 app = FastAPI(title="AI Recrutement API", version="0.1.0")
+app.include_router(stats.router, prefix="/api/stats", tags=["Stats"])
+
 
 app.add_middleware(
     CORSMiddleware,
