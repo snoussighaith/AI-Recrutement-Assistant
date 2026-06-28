@@ -37,6 +37,14 @@ const features: Feature[] = [
     badge: 'AI Powered',
     badgeColor: 'from-green-500 to-emerald-500',
   },
+  {
+    href: '/candidats',
+    icon: '👥',
+    title: 'Candidats',
+    description: 'Liste complète des candidats avec filtres par compétences et recherche',
+    badge: 'Gestion RH',
+    badgeColor: 'from-orange-500 to-amber-500',
+  },
 ]
 
 export default function HomePage() {

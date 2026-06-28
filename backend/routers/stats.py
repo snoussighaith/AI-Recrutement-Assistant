@@ -45,3 +45,30 @@ def get_stats(db: Session = Depends(get_db)):
         "top_skills": top_skills,
         "derniers_candidats": candidats_list,
     }
+@router.get("/candidats")
+def liste_candidats_filtres(
+    skill: str = None,
+    db: Session = Depends(get_db)
+):
+    candidats = db.query(Candidat).all()
+    result = []
+    
+    for c in candidats:
+        skills = []
+        for cv in c.cvs:
+            skills += [comp.nom for comp in cv.competences]
+        
+        # Filtre par compétence si demandé
+        if skill and skill.lower() not in skills:
+            continue
+            
+        result.append({
+            "id": c.id,
+            "email": c.email,
+            "telephone": c.telephone,
+            "skills": list(dict.fromkeys(skills)),
+            "nb_cvs": len(c.cvs),
+            "created_at": str(c.created_at),
+        })
+    
+    return {"total": len(result), "candidats": result}

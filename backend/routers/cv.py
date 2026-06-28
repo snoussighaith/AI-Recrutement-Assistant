@@ -4,8 +4,9 @@ from database import get_db
 from models import Candidat, CV, Competence
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../ml"))
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../ml"))
 from cv_parser import parse_cv
-
 router = APIRouter()
 
 @router.post("/upload")
@@ -72,3 +73,25 @@ def liste_candidats(db: Session = Depends(get_db)):
             "nb_cvs": len(c.cvs),
         })
     return result
+@router.get("/candidats/{candidat_id}")
+def get_candidat(candidat_id: int, db: Session = Depends(get_db)):
+    candidat = db.query(Candidat).filter(Candidat.id == candidat_id).first()
+    if not candidat:
+        raise HTTPException(status_code=404, detail="Candidat non trouvé")
+    
+    skills = []
+    experience = []
+    education = []
+    for cv in candidat.cvs:
+        skills += [comp.nom for comp in cv.competences]
+        experience += cv.texte_brut.split(".")[:3] if cv.texte_brut else []
+    
+    return {
+        "id": candidat.id,
+        "email": candidat.email,
+        "telephone": candidat.telephone,
+        "skills": list(dict.fromkeys(skills)),
+        "experience": experience,
+        "nb_cvs": len(candidat.cvs),
+        "created_at": str(candidat.created_at),
+    }

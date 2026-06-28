@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: recrutement
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: snou
     ports:
       - "5432:5432"
     volumes:
@@ -18,7 +18,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/recrutement
+      DATABASE_URL: postgresql://postgres:snou@postgres:5432/recrutement
     depends_on:
       - postgres
 

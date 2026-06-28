@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import get_db
 from models import Candidat, CV, Competence
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../ml"))
 from matcher import matcher_candidats
-
 router = APIRouter()
 
 class OffreInput(BaseModel):
