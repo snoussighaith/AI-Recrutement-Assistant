@@ -21,7 +21,7 @@ export function Input({ label, error, icon, className = '', ...props }: InputPro
           </div>
         )}
         <input
-          className={`w-full ${icon ? 'pl-10' : 'px-4'} py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200 ${
+          className={`w-full ${icon ? 'pl-10' : 'px-4'} py-2.5 border-2 border-gray-200 rounded-xl bg-white text-gray-800 placeholder:text-gray-400 dark:bg-slate-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:border-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all duration-200 ${
             error ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : ''
           } ${className}`}
           {...props}
@@ -46,7 +46,7 @@ export function TextArea({ label, error, className = '', ...props }: TextAreaPro
         </label>
       )}
       <textarea
-        className={`w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200 resize-none ${
+        className={`w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl bg-white text-gray-800 placeholder:text-gray-400 dark:bg-slate-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:border-slate-600 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all duration-200 resize-none ${
           error ? 'border-red-500 focus:border-red-500 focus:ring-red-100' : ''
         } ${className}`}
         {...props}

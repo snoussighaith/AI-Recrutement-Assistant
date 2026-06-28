@@ -21,6 +21,13 @@ export default function MatchingPage() {
   const [error, setError] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
+  const resetSearch = () => {
+    setForm({ titre: '', description: '', competences: '' })
+    setResultats([])
+    setSubmitted(false)
+    setError('')
+  }
+
   const handleMatch = async () => {
     if (!form.titre.trim()) {
       setError('Veuillez entrer le titre du poste')
@@ -70,10 +77,15 @@ export default function MatchingPage() {
     return 'À améliorer'
   }
 
+  const topCandidate = resultats[0]
+  const averageScore =
+    resultats.length > 0
+      ? Math.round(resultats.reduce((sum, candidat) => sum + candidat.score, 0) / resultats.length)
+      : 0
+
   return (
     <main className="min-h-screen pt-8 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="text-6xl mb-4">🎯</div>
           <h1 className="text-4xl font-bold text-gray-800 mb-3">Smart Matching</h1>
@@ -82,10 +94,19 @@ export default function MatchingPage() {
           </p>
         </div>
 
-        {/* Form */}
-        <Card variant="elevated" className="mb-8">
+        <Card variant="elevated" className="mb-8 border border-blue-100">
           <CardContent className="pt-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Créer une Offre d'Emploi</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Créer une Offre d'Emploi</h2>
+                <p className="text-gray-600 mt-1 text-sm">
+                  Complétez les informations essentielles pour lancer un matching précis.
+                </p>
+              </div>
+              <Badge variant="info" size="md">
+                Étape 1: Définir le besoin
+              </Badge>
+            </div>
 
             {error && (
               <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
@@ -93,7 +114,7 @@ export default function MatchingPage() {
               </div>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-5">
               <Input
                 label="📋 Titre du Poste"
                 placeholder="ex: Senior Data Engineer"
@@ -116,6 +137,13 @@ export default function MatchingPage() {
                 onChange={(e) => setForm({ ...form, competences: e.target.value })}
               />
 
+              <div className="rounded-xl bg-blue-50 border border-blue-100 p-4">
+                <p className="text-sm font-semibold text-blue-900 mb-1">Conseil de saisie</p>
+                <p className="text-sm text-blue-700">
+                  Utilisez des compétences claires et séparées par des virgules pour améliorer la pertinence du scoring.
+                </p>
+              </div>
+
               <Button
                 onClick={handleMatch}
                 disabled={!form.titre || loading}
@@ -129,7 +157,6 @@ export default function MatchingPage() {
           </CardContent>
         </Card>
 
-        {/* Results */}
         {submitted && resultats.length === 0 && !loading && (
           <Card variant="elevated" className="border-yellow-200 bg-yellow-50">
             <CardContent className="text-center py-12">
@@ -143,25 +170,56 @@ export default function MatchingPage() {
         )}
 
         {resultats.length > 0 && (
-          <div>
-            {/* Results Header */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                📌 Résultats du Matching
-              </h2>
+          <div className="space-y-6">
+            <div className="mb-2">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">📌 Résultats du Matching</h2>
               <p className="text-gray-600">
-                {resultats.length} candidat{resultats.length > 1 ? 's' : ''} trouvé{resultats.length > 1 ? 's' : ''} 
-                <span className="font-semibold"> - Classés par score de pertinence</span>
+                {resultats.length} candidat{resultats.length > 1 ? 's' : ''} trouvé{resultats.length > 1 ? 's' : ''}.
               </p>
             </div>
 
-            {/* Candidates Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <Card variant="default">
+                <CardContent className="py-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Candidats</p>
+                  <p className="text-2xl font-bold text-gray-800 mt-1">{resultats.length}</p>
+                </CardContent>
+              </Card>
+              <Card variant="default">
+                <CardContent className="py-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Score moyen</p>
+                  <p className="text-2xl font-bold text-gray-800 mt-1">{averageScore}%</p>
+                </CardContent>
+              </Card>
+              <Card variant="default">
+                <CardContent className="py-4">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Meilleur score</p>
+                  <p className="text-2xl font-bold text-gray-800 mt-1">{topCandidate.score}%</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card variant="elevated" className="border border-green-100 bg-gradient-to-br from-green-50 to-emerald-50">
+              <CardContent className="py-6">
+                <p className="text-xs uppercase tracking-wide text-green-700 font-semibold mb-2">Top candidat</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <p className="font-bold text-xl text-gray-800">{topCandidate.email}</p>
+                    <p className="text-sm text-gray-600">ID: #{topCandidate.candidat_id}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-3xl font-bold text-green-700">{topCandidate.score}%</p>
+                    <Badge variant="success" size="md">{getScoreLabel(topCandidate.score)}</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="space-y-4">
               {resultats.map((candidat, index) => (
                 <Card key={candidat.candidat_id} variant="elevated" className="hover:shadow-xl transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                      {/* Rank & Email */}
                       <div className="flex items-center gap-4">
                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold text-lg">
                           {index + 1}
@@ -172,7 +230,6 @@ export default function MatchingPage() {
                         </div>
                       </div>
 
-                      {/* Score */}
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <p className="text-2xl font-bold text-gray-800">{candidat.score}%</p>
@@ -184,7 +241,6 @@ export default function MatchingPage() {
                       </div>
                     </div>
 
-                    {/* Score Bar */}
                     <div className="mb-4">
                       <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
                         <div
@@ -194,7 +250,6 @@ export default function MatchingPage() {
                       </div>
                     </div>
 
-                    {/* Skills */}
                     <div>
                       <p className="text-sm font-semibold text-gray-600 mb-2.5">
                         Compétences Correspondantes:
@@ -211,34 +266,22 @@ export default function MatchingPage() {
                         )}
                       </div>
                     </div>
-
-                    {/* Action Button */}
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <Button variant="secondary" size="sm" className="w-full">
-                        👁️ Voir le Profil Complet
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            {/* Footer Actions */}
             <div className="mt-8 flex gap-4">
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 size="lg"
                 className="flex-1"
-                onClick={() => {
-                  setForm({ titre: '', description: '', competences: '' })
-                  setResultats([])
-                  setSubmitted(false)
-                }}
+                onClick={resetSearch}
               >
                 ➕ Nouvelle Recherche
               </Button>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 size="lg"
                 className="flex-1"
                 onClick={() => window.location.href = '/'}
