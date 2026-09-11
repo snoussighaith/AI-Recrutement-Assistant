@@ -17,7 +17,10 @@ export default function CandidatsPage() {
   const [filtered, setFiltered] = useState<Candidat[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [skillFilter, setSkillFilter] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
+  const [selected, setSelected] = useState<Candidat | null>(null)
 
   useEffect(() => {
     fetch('http://localhost:8000/api/cv/candidats')
@@ -29,12 +32,18 @@ export default function CandidatsPage() {
       })
   }, [])
 
+  // debounce search input
   useEffect(() => {
-    let result = candidats
+    const t = setTimeout(() => setDebouncedSearch(search), 250)
+    return () => clearTimeout(t)
+  }, [search])
 
-    if (search) {
+  useEffect(() => {
+    let result = candidats.slice()
+
+    if (debouncedSearch) {
       result = result.filter(c =>
-        c.email.toLowerCase().includes(search.toLowerCase())
+        c.email.toLowerCase().includes(debouncedSearch.toLowerCase())
       )
     }
 
@@ -44,8 +53,17 @@ export default function CandidatsPage() {
       )
     }
 
+    // sorting
+    if (sortBy === 'newest') {
+      result.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))
+    } else if (sortBy === 'oldest') {
+      result.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at))
+    } else if (sortBy === 'most_cvs') {
+      result.sort((a, b) => b.nb_cvs - a.nb_cvs)
+    }
+
     setFiltered(result)
-  }, [search, skillFilter, candidats])
+  }, [debouncedSearch, skillFilter, candidats, sortBy])
 
   const allSkills = [...new Set(candidats.flatMap(c => c.skills))].sort()
 
@@ -71,8 +89,42 @@ export default function CandidatsPage() {
           </Link>
         </div>
 
+        {/* Modal détails candidat */}
+        {selected && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setSelected(null)} />
+            <div className="relative bg-white rounded-2xl shadow-xl max-w-xl w-full p-6 z-10">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Détails — {selected.email}</h2>
+                  <p className="text-xs text-gray-400">#{selected.id} • {new Date(selected.created_at).toLocaleDateString('fr-FR')}</p>
+                </div>
+                <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600">Fermer</button>
+              </div>
+
+              <div className="mt-4">
+                {selected.telephone && <p className="text-sm">📞 {selected.telephone}</p>}
+                <p className="text-sm mt-2">Nombre de CVs: <strong>{selected.nb_cvs}</strong></p>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selected.skills.map(s => (
+                    <button key={s} onClick={() => { setSkillFilter(s); setSelected(null) }} className="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full">{s}</button>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={() => navigator.clipboard?.writeText(selected.email)}
+                    className="text-sm bg-gray-100 px-3 py-1 rounded-md"
+                  >Copier email</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Filtres */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex gap-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 flex gap-4 flex-wrap">
           <input
             type="text"
             placeholder="🔍 Rechercher par email..."
@@ -89,6 +141,15 @@ export default function CandidatsPage() {
             {allSkills.map(skill => (
               <option key={skill} value={skill}>{skill}</option>
             ))}
+          </select>
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            <option value="newest">Trier: Plus récent</option>
+            <option value="oldest">Trier: Plus ancien</option>
+            <option value="most_cvs">Trier: Plus de CVs</option>
           </select>
           {(search || skillFilter) && (
             <button
@@ -149,6 +210,14 @@ export default function CandidatsPage() {
                   <p className="text-xs text-gray-400 mt-2">
                     {new Date(c.created_at).toLocaleDateString('fr-FR')}
                   </p>
+                  <div className="mt-3">
+                    <button
+                      onClick={() => setSelected(c)}
+                      className="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition"
+                    >
+                      Voir
+                    </button>
+                  </div>
                 </div>
 
               </div>

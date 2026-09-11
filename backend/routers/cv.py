@@ -3,9 +3,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Candidat, CV, Competence
 import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), "../../ml"))
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../ml"))
+# Ensure backend/ml is importable
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "ml"))
 from cv_parser import parse_cv
 router = APIRouter()
 
@@ -69,8 +68,9 @@ def liste_candidats(db: Session = Depends(get_db)):
             "id": c.id,
             "email": c.email,
             "telephone": c.telephone,
-            "competences": competences,
+            "skills": list(dict.fromkeys(competences)),
             "nb_cvs": len(c.cvs),
+            "created_at": str(c.created_at),
         })
     return result
 @router.get("/candidats/{candidat_id}")

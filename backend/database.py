@@ -9,7 +9,13 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Le moteur = la connexion physique à PostgreSQL
-engine = create_engine(DATABASE_URL)
+if not DATABASE_URL:
+    # Développement local : fallback vers sqlite pour faciliter les tests sans Postgres
+    print("⚠️  DATABASE_URL non défini, utilisation de sqlite:///.local_dev.db pour le dev local")
+    DATABASE_URL = "sqlite:///./.local_dev.db"
+
+# Le moteur = la connexion physique à PostgreSQL (ou sqlite en fallback)
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {})
 
 # La session = une transaction ouverte avec la BDD
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
