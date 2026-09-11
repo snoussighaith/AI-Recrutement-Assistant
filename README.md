@@ -67,5 +67,5 @@ npm run dev
 ## 👨‍💻 Auteur
 
 **Ghaith Snoussi** — Master 2 Data Science, ISIMA Mahdia
-- LinkedIn: [Ghaith Snoussi](https://linkedin.com/in/ghaith-snoussi)
+- LinkedIn: [Ghaith Snoussi](https://www.linkedin.com/in/ghaith-snoussi-951ab2275/)
 - GitHub: [@snoussighaith](https://github.com/snoussighaith)
